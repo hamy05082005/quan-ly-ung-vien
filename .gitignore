@@ -1,0 +1,16 @@
+.env
+.env*
+**/.env*
+*service-account*.json
+*service_account*.json
+*serviceAccount*.json
+*firebase-adminsdk*.json
+credentials*.json
+secrets*.json
+*.pem
+*.key
+*.p12
+*.pfx
+node_modules/
+.git/
+work/test-users-cleanup.json
