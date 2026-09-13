@@ -1,0 +1,9 @@
+session: 1
+provider: codex
+skills:
+  - vibe-build
+  - stitch
+  - frontend-design
+  - copywriting
+  - design
+  - ui-ux-pro-max
