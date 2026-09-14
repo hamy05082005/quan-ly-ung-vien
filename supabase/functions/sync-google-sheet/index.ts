@@ -2,7 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.116.0'
 import { GoogleAuth } from 'npm:google-auth-library@9.15.1'
 
 const corsBase = {
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json; charset=utf-8',
 }
@@ -75,8 +75,14 @@ Deno.serve(async (request) => {
 
   // ── Load secrets ────────────────────────────────────────────────────────────
   const url = Deno.env.get('SUPABASE_URL')
-  const publishableKeys = JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') ?? '{}')
-  const secretKeys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}')
+  let publishableKeys: Record<string, string> = {}
+  let secretKeys: Record<string, string> = {}
+  try {
+    publishableKeys = JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') ?? '{}')
+    secretKeys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}')
+  } catch {
+    return fail('Cấu hình khóa Supabase không hợp lệ.', 500, origin)
+  }
   const publishableKey = publishableKeys.default ?? Deno.env.get('SUPABASE_ANON_KEY')
   const secretKey = secretKeys.default ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const rawCredentials = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON')
