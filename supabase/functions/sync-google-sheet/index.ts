@@ -284,6 +284,7 @@ Deno.serve(async (request) => {
     }
 
     let imported = 0
+    const candidatePayloads: Record<string, unknown>[] = []
     const { data: allJobs } = await admin.from('recruitment_jobs').select('id, title').eq('owner_id', ownerId)
     const jobMap = new Map<string, string>()
     if (allJobs) {
@@ -324,9 +325,12 @@ Deno.serve(async (request) => {
         warranty_status: warranty(warrantyCol >= 0 ? row[warrantyCol] : null),
         source_last_synced_at: new Date().toISOString(),
       }
-      const { error: candidateError } = await admin.from('recruitment_candidates').upsert(payload, { onConflict: 'owner_id,external_candidate_key' })
-      if (candidateError) throw candidateError
+      candidatePayloads.push(payload)
       imported++
+    }
+    if (candidatePayloads.length) {
+      const { error: candidateError } = await admin.from('recruitment_candidates').upsert(candidatePayloads, { onConflict: 'owner_id,external_candidate_key' })
+      if (candidateError) throw candidateError
     }
     await admin.from('recruitment_sync_runs').update({ status: skipped ? 'partial' : 'success', finished_at: new Date().toISOString() }).eq('id', run.id)
     return new Response(JSON.stringify({ imported, skipped, sourceRows: unique.size, collaboratorCode }), { headers: corsHeaders })
